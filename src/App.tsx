@@ -8,6 +8,9 @@ import { AppLayout } from "@/components/layouts/AppLayout";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import Subaccounts from "./pages/Subaccounts";
+import Contacts from "./pages/Contacts";
+import Campaigns from "./pages/Campaigns";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,9 +28,9 @@ const App = () => (
             
             {/* Protected Routes */}
             <Route path="/dashboard" element={<AppLayout><Dashboard /></AppLayout>} />
-            <Route path="/subaccounts" element={<AppLayout><div className="p-6"><h1 className="text-2xl font-bold">Subaccounts</h1><p className="text-muted-foreground">Coming soon...</p></div></AppLayout>} />
-            <Route path="/contacts" element={<AppLayout><div className="p-6"><h1 className="text-2xl font-bold">Contacts</h1><p className="text-muted-foreground">Coming soon...</p></div></AppLayout>} />
-            <Route path="/campaigns" element={<AppLayout><div className="p-6"><h1 className="text-2xl font-bold">Campaigns</h1><p className="text-muted-foreground">Coming soon...</p></div></AppLayout>} />
+            <Route path="/subaccounts" element={<AppLayout><Subaccounts /></AppLayout>} />
+            <Route path="/contacts" element={<AppLayout><Contacts /></AppLayout>} />
+            <Route path="/campaigns" element={<AppLayout><Campaigns /></AppLayout>} />
             <Route path="/workflows" element={<AppLayout><div className="p-6"><h1 className="text-2xl font-bold">Workflows</h1><p className="text-muted-foreground">Coming soon...</p></div></AppLayout>} />
             <Route path="/ai-assistant" element={<AppLayout><div className="p-6"><h1 className="text-2xl font-bold">AI Assistant</h1><p className="text-muted-foreground">Coming soon...</p></div></AppLayout>} />
             <Route path="/social-planner" element={<AppLayout><div className="p-6"><h1 className="text-2xl font-bold">Social Planner</h1><p className="text-muted-foreground">Coming soon...</p></div></AppLayout>} />
