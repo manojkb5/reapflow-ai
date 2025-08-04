@@ -46,11 +46,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
               <Menu className="h-5 w-5" />
             </SidebarTrigger>
             
-            <div className="flex-1 flex justify-center">
-              <div className="text-sm text-muted-foreground">
-                Welcome to your AI-powered CRM
-              </div>
-            </div>
+            <div className="flex-1"></div>
 
             <div className="flex items-center gap-2">
               <div className="h-2 w-2 bg-accent rounded-full animate-pulse"></div>

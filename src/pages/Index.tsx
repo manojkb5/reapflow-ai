@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/AuthProvider";
-import { ArrowRight, Zap, Target, Brain } from "lucide-react";
+import { ArrowRight, Zap, Target, Brain, CheckCircle, Mail, Phone, MapPin } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 const Index = () => {
@@ -30,32 +30,43 @@ const Index = () => {
     {
       icon: Brain,
       title: "AI-Powered Automation",
-      description: "Let AI handle your marketing campaigns, lead generation, and content creation automatically."
+      description: "True AI integrations, not basic automations. Let machine learning optimize your campaigns, predict customer behavior, and auto-generate high-converting content."
     },
     {
       icon: Target,
-      title: "Multi-Platform Campaigns",
-      description: "Create and manage campaigns across Facebook, Instagram, YouTube, Google Ads, and LinkedIn."
+      title: "One-Click Multi-Platform Campaigns",
+      description: "Launch synchronized campaigns across Facebook, Instagram, YouTube, Google Ads, and LinkedIn from a single dashboard. No more platform juggling."
     },
     {
       icon: Zap,
-      title: "Intelligent Workflows",
-      description: "Build custom automation workflows that trigger actions based on lead behavior and engagement."
+      title: "Intelligent Workflows with Real-Time Analytics",
+      description: "Build smart automation workflows that adapt based on performance data. Get instant insights, not delayed reports like traditional CRMs."
     }
+  ];
+
+  const comparisons = [
+    "Real AI integrations (not just basic automations)",
+    "One-click multi-platform campaigns",
+    "Intuitive workflows with real-time analytics", 
+    "Affordable pricing with no hidden costs",
+    "Built-in social media scheduler",
+    "Advanced lead scoring with AI insights"
   ];
 
   return (
     <div className="min-h-screen bg-gradient-dark">
+      {/* Header with Logo in Top Right */}
+      <header className="absolute top-4 right-4 z-10">
+        <img 
+          src={logo} 
+          alt="ReapFlow" 
+          className="w-12 h-12 animate-float" 
+        />
+      </header>
+
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-20">
         <div className="text-center mb-16">
-          <div className="flex justify-center mb-8">
-            <img 
-              src={logo} 
-              alt="ReapFlow" 
-              className="w-20 h-20 animate-float" 
-            />
-          </div>
           
           <h1 className="text-6xl font-bold mb-6">
             <span className="bg-gradient-primary bg-clip-text text-transparent">
@@ -68,28 +79,19 @@ const Index = () => {
           </p>
           
           <p className="text-lg text-foreground/80 mb-12 max-w-3xl mx-auto">
-            Automate your marketing campaigns, manage leads intelligently, and scale your business 
-            with the power of artificial intelligence. Built for modern businesses who want to 
-            dominate digital marketing.
+            Stop wasting time with outdated CRM tools. ReapFlow combines the power of real AI automation 
+            with intuitive campaign management to help you scale faster than HubSpot, Zoho, or any traditional CRM.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex justify-center">
             <Button 
               variant="neon" 
               size="lg" 
               onClick={() => navigate("/auth")}
-              className="text-lg px-8 py-6"
+              className="text-lg px-12 py-6 hover:scale-105 transition-transform"
             >
-              Get Started Free
+              Get Started
               <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-            
-            <Button 
-              variant="glass" 
-              size="lg"
-              className="text-lg px-8 py-6"
-            >
-              Watch Demo
             </Button>
           </div>
         </div>
@@ -114,24 +116,71 @@ const Index = () => {
           ))}
         </div>
 
-        {/* CTA Section */}
-        <div className="text-center glass p-12 rounded-2xl border-primary/20">
-          <h2 className="text-3xl font-bold text-foreground mb-4">
-            Ready to Transform Your Marketing?
+        {/* Why ReapFlow is Better Section */}
+        <div className="mb-20">
+          <h2 className="text-4xl font-bold text-center text-foreground mb-4">
+            Why ReapFlow is Better
           </h2>
-          <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Join hundreds of businesses already using ReapFlow to automate their marketing, 
-            generate more leads, and increase conversions with AI.
+          <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
+            Traditional CRMs like HubSpot and Zoho are outdated. ReapFlow is built for the AI era.
           </p>
-          <Button 
-            variant="neon" 
-            size="lg"
-            onClick={() => navigate("/auth")}
-            className="text-lg px-8 py-6"
-          >
-            Start Your Free Trial
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            {comparisons.map((feature, index) => (
+              <div key={index} className="flex items-center gap-4 glass p-6 rounded-xl border-primary/20">
+                <CheckCircle className="h-6 w-6 text-accent flex-shrink-0" />
+                <span className="text-foreground font-medium">{feature}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Contact Us Section */}
+        <div className="glass p-12 rounded-2xl border-primary/20">
+          <h2 className="text-3xl font-bold text-center text-foreground mb-12">
+            Contact Us
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                <Mail className="h-6 w-6 text-background" />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-2">Email</h3>
+              <p className="text-muted-foreground">contact@reapflow.com</p>
+              <p className="text-muted-foreground">support@reapflow.com</p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                <Phone className="h-6 w-6 text-background" />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-2">Phone</h3>
+              <p className="text-muted-foreground">+1 (234) 567-890</p>
+              <p className="text-muted-foreground">+1 (234) 567-891</p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                <MapPin className="h-6 w-6 text-background" />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-2">Address</h3>
+              <p className="text-muted-foreground">ReapFlow HQ</p>
+              <p className="text-muted-foreground">123 Innovation Drive, Tech City</p>
+            </div>
+          </div>
+          
+          <div className="text-center mt-12">
+            <Button 
+              variant="neon" 
+              size="lg"
+              onClick={() => navigate("/auth")}
+              className="text-lg px-8 py-6"
+            >
+              Get Started Today
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
