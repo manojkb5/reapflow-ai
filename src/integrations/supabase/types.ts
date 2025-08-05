@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_insights: {
+        Row: {
+          confidence_score: number | null
+          description: string
+          generated_at: string | null
+          id: string
+          insight_type: string
+          is_read: boolean | null
+          metadata: Json | null
+          subaccount_id: string
+          title: string
+        }
+        Insert: {
+          confidence_score?: number | null
+          description: string
+          generated_at?: string | null
+          id?: string
+          insight_type: string
+          is_read?: boolean | null
+          metadata?: Json | null
+          subaccount_id: string
+          title: string
+        }
+        Update: {
+          confidence_score?: number | null
+          description?: string
+          generated_at?: string | null
+          id?: string
+          insight_type?: string
+          is_read?: boolean | null
+          metadata?: Json | null
+          subaccount_id?: string
+          title?: string
+        }
+        Relationships: []
+      }
       ai_logs: {
         Row: {
           created_at: string
@@ -60,6 +96,7 @@ export type Database = {
           campaign_id: string | null
           clicks: number | null
           conversions: number | null
+          cost_per_conversion: number | null
           cpc: number | null
           created_at: string
           ctr: number | null
@@ -67,6 +104,7 @@ export type Database = {
           id: string
           impressions: number | null
           platform: Database["public"]["Enums"]["campaign_platform"]
+          revenue: number | null
           roas: number | null
           spend: number | null
           subaccount_id: string
@@ -75,6 +113,7 @@ export type Database = {
           campaign_id?: string | null
           clicks?: number | null
           conversions?: number | null
+          cost_per_conversion?: number | null
           cpc?: number | null
           created_at?: string
           ctr?: number | null
@@ -82,6 +121,7 @@ export type Database = {
           id?: string
           impressions?: number | null
           platform: Database["public"]["Enums"]["campaign_platform"]
+          revenue?: number | null
           roas?: number | null
           spend?: number | null
           subaccount_id: string
@@ -90,6 +130,7 @@ export type Database = {
           campaign_id?: string | null
           clicks?: number | null
           conversions?: number | null
+          cost_per_conversion?: number | null
           cpc?: number | null
           created_at?: string
           ctr?: number | null
@@ -97,6 +138,7 @@ export type Database = {
           id?: string
           impressions?: number | null
           platform?: Database["public"]["Enums"]["campaign_platform"]
+          revenue?: number | null
           roas?: number | null
           spend?: number | null
           subaccount_id?: string
@@ -114,6 +156,50 @@ export type Database = {
             columns: ["subaccount_id"]
             isOneToOne: false
             referencedRelation: "subaccounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaign_performance: {
+        Row: {
+          campaign_id: string | null
+          clicks: number | null
+          conversions: number | null
+          created_at: string | null
+          date: string
+          id: string
+          impressions: number | null
+          revenue: number | null
+          spend: number | null
+        }
+        Insert: {
+          campaign_id?: string | null
+          clicks?: number | null
+          conversions?: number | null
+          created_at?: string | null
+          date: string
+          id?: string
+          impressions?: number | null
+          revenue?: number | null
+          spend?: number | null
+        }
+        Update: {
+          campaign_id?: string | null
+          clicks?: number | null
+          conversions?: number | null
+          created_at?: string | null
+          date?: string
+          id?: string
+          impressions?: number | null
+          revenue?: number | null
+          spend?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_performance_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
             referencedColumns: ["id"]
           },
         ]
@@ -239,6 +325,41 @@ export type Database = {
           },
         ]
       }
+      integration_logs: {
+        Row: {
+          created_at: string | null
+          event_data: Json | null
+          event_message: string | null
+          event_type: string
+          id: string
+          integration_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_data?: Json | null
+          event_message?: string | null
+          event_type: string
+          id?: string
+          integration_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_data?: Json | null
+          event_message?: string | null
+          event_type?: string
+          id?: string
+          integration_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_logs_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "integrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       integrations: {
         Row: {
           access_token: string | null
@@ -288,6 +409,62 @@ export type Database = {
             columns: ["subaccount_id"]
             isOneToOne: false
             referencedRelation: "subaccounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_analytics: {
+        Row: {
+          clicks: number | null
+          comments: number | null
+          created_at: string | null
+          ctr: number | null
+          engagement: number | null
+          engagement_rate: number | null
+          id: string
+          impressions: number | null
+          likes: number | null
+          platform: string
+          post_id: string | null
+          reach: number | null
+          shares: number | null
+        }
+        Insert: {
+          clicks?: number | null
+          comments?: number | null
+          created_at?: string | null
+          ctr?: number | null
+          engagement?: number | null
+          engagement_rate?: number | null
+          id?: string
+          impressions?: number | null
+          likes?: number | null
+          platform: string
+          post_id?: string | null
+          reach?: number | null
+          shares?: number | null
+        }
+        Update: {
+          clicks?: number | null
+          comments?: number | null
+          created_at?: string | null
+          ctr?: number | null
+          engagement?: number | null
+          engagement_rate?: number | null
+          id?: string
+          impressions?: number | null
+          likes?: number | null
+          platform?: string
+          post_id?: string | null
+          reach?: number | null
+          shares?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_analytics_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_posts"
             referencedColumns: ["id"]
           },
         ]
@@ -445,6 +622,50 @@ export type Database = {
             columns: ["subaccount_id"]
             isOneToOne: false
             referencedRelation: "subaccounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_executions: {
+        Row: {
+          completed_at: string | null
+          error_message: string | null
+          execution_status: string | null
+          id: string
+          started_at: string | null
+          steps_completed: number | null
+          total_steps: number | null
+          trigger_data: Json | null
+          workflow_id: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          error_message?: string | null
+          execution_status?: string | null
+          id?: string
+          started_at?: string | null
+          steps_completed?: number | null
+          total_steps?: number | null
+          trigger_data?: Json | null
+          workflow_id?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          error_message?: string | null
+          execution_status?: string | null
+          id?: string
+          started_at?: string | null
+          steps_completed?: number | null
+          total_steps?: number | null
+          trigger_data?: Json | null
+          workflow_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_executions_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "workflows"
             referencedColumns: ["id"]
           },
         ]

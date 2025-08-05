@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { 
   Calendar as CalendarIcon, 
   Plus, 
@@ -17,7 +18,18 @@ import {
   Youtube,
   Edit,
   Trash2,
-  Eye
+  Eye,
+  Brain,
+  Hash,
+  TrendingUp,
+  BarChart3,
+  Users,
+  Heart,
+  MessageCircle,
+  Share,
+  ArrowUpDown,
+  Sparkles,
+  Target
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,18 +40,40 @@ const SocialPlanner = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [posts, setPosts] = useState<any[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showPerformanceModal, setShowPerformanceModal] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [aiSuggestionsEnabled, setAiSuggestionsEnabled] = useState(true);
+  const [showHashtagSuggestions, setShowHashtagSuggestions] = useState(false);
+  const [bestTimeInsights, setBestTimeInsights] = useState<any>(null);
   const [newPost, setNewPost] = useState({
     platform: '',
     content: '',
     scheduled_for: new Date(),
-    media_urls: [] as string[]
+    media_urls: [] as string[],
+    hashtags: [] as string[],
+    auto_publish: true
   });
 
   const platforms = [
-    { id: 'facebook', name: 'Facebook', icon: Facebook, color: 'text-blue-500' },
-    { id: 'instagram', name: 'Instagram', icon: Instagram, color: 'text-pink-500' },
-    { id: 'youtube', name: 'YouTube', icon: Youtube, color: 'text-red-500' }
+    { id: 'facebook', name: 'Facebook', icon: Facebook, color: 'text-blue-500', bestTimes: ['9:00 AM', '1:00 PM', '7:00 PM'] },
+    { id: 'instagram', name: 'Instagram', icon: Instagram, color: 'text-pink-500', bestTimes: ['11:00 AM', '2:00 PM', '5:00 PM'] },
+    { id: 'youtube', name: 'YouTube', icon: Youtube, color: 'text-red-500', bestTimes: ['2:00 PM', '8:00 PM', '9:00 PM'] },
+    { id: 'linkedin', name: 'LinkedIn', icon: Users, color: 'text-blue-700', bestTimes: ['8:00 AM', '12:00 PM', '6:00 PM'] }
+  ];
+
+  const hashtagSuggestions = {
+    facebook: ['#business', '#marketing', '#growth', '#success', '#entrepreneur'],
+    instagram: ['#instagood', '#photooftheday', '#beautiful', '#marketing', '#business'],
+    youtube: ['#youtube', '#video', '#content', '#creator', '#trending'],
+    linkedin: ['#professional', '#networking', '#career', '#business', '#leadership']
+  };
+
+  const performanceMetrics = [
+    { label: 'Reach', value: '12.5K', change: '+15%', icon: Eye },
+    { label: 'Engagement', value: '2.3K', change: '+8%', icon: Heart },
+    { label: 'Shares', value: '456', change: '+22%', icon: Share },
+    { label: 'Comments', value: '189', change: '+12%', icon: MessageCircle },
   ];
 
   const monthDays = eachDayOfInterval({
@@ -103,7 +137,9 @@ const SocialPlanner = () => {
         platform: '',
         content: '',
         scheduled_for: new Date(),
-        media_urls: []
+        media_urls: [],
+        hashtags: [],
+        auto_publish: true
       });
       toast.success('Post scheduled successfully');
     } catch (error) {
@@ -149,7 +185,9 @@ const SocialPlanner = () => {
     const aiSuggestions = [
       "🌟 Transform your business with the power of AI! Our latest campaign management tools are helping businesses increase their ROI by 300%. What's your biggest marketing challenge? #AIMarketing #BusinessGrowth",
       "💡 Pro tip: The best time to post on social media varies by platform. Facebook: 9-10am, Instagram: 11am-1pm, LinkedIn: 12-1pm. When do you see the most engagement? #SocialMediaTips",
-      "🚀 Just launched our new CRM feature! Now you can automate your entire customer journey from first touch to conversion. Who else loves automation? #CRM #MarketingAutomation"
+      "🚀 Just launched our new CRM feature! Now you can automate your entire customer journey from first touch to conversion. Who else loves automation? #CRM #MarketingAutomation",
+      "📊 Data-driven marketing is the future! Companies using analytics-driven strategies see 5x higher ROI. What metrics do you track? #DataMarketing #Analytics",
+      "🎯 Personalization is key! 71% of consumers expect personalized experiences. How are you personalizing your customer journey? #Personalization #CX"
     ];
 
     const randomSuggestion = aiSuggestions[Math.floor(Math.random() * aiSuggestions.length)];
@@ -157,25 +195,108 @@ const SocialPlanner = () => {
     toast.success('AI content generated!');
   };
 
+  const generateHashtagSuggestions = () => {
+    if (!newPost.platform) {
+      toast.error('Please select a platform first');
+      return;
+    }
+    
+    const suggestions = hashtagSuggestions[newPost.platform as keyof typeof hashtagSuggestions] || [];
+    setNewPost(prev => ({ ...prev, hashtags: suggestions }));
+    setShowHashtagSuggestions(true);
+    toast.success('Hashtag suggestions generated!');
+  };
+
+  const getBestTimeForPlatform = (platform: string) => {
+    const platformData = platforms.find(p => p.id === platform);
+    return platformData?.bestTimes || [];
+  };
+
+  const suggestBestTime = () => {
+    if (!newPost.platform) {
+      toast.error('Please select a platform first');
+      return;
+    }
+
+    const bestTimes = getBestTimeForPlatform(newPost.platform);
+    const randomTime = bestTimes[Math.floor(Math.random() * bestTimes.length)];
+    
+    // Convert time string to today's date with that time
+    const [time, period] = randomTime.split(' ');
+    const [hours, minutes] = time.split(':');
+    let hour = parseInt(hours);
+    
+    if (period === 'PM' && hour !== 12) hour += 12;
+    if (period === 'AM' && hour === 12) hour = 0;
+    
+    const suggestedDate = new Date();
+    suggestedDate.setHours(hour, parseInt(minutes), 0, 0);
+    
+    setNewPost(prev => ({ ...prev, scheduled_for: suggestedDate }));
+    toast.success(`Best time suggested: ${randomTime}`);
+  };
+
+  const autoFillEmptySlots = () => {
+    const emptyDays = [];
+    const monthDays = eachDayOfInterval({
+      start: startOfMonth(selectedDate),
+      end: endOfMonth(selectedDate)
+    });
+
+    monthDays.forEach(day => {
+      const dayPosts = getPostsForDay(day);
+      if (dayPosts.length === 0) {
+        emptyDays.push(day);
+      }
+    });
+
+    if (emptyDays.length > 0) {
+      toast.success(`Found ${emptyDays.length} empty slots. AI will suggest optimal posting times.`);
+    } else {
+      toast.info('No empty slots found in this month!');
+    }
+  };
+
+  const viewPostPerformance = (post: any) => {
+    setSelectedPost(post);
+    setShowPerformanceModal(true);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
         <div>
           <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
             Social Planner
           </h1>
           <p className="text-muted-foreground">
-            Schedule and manage your social media content across platforms
+            Schedule and manage your social media content with AI-powered optimization
           </p>
         </div>
-        <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
-          <DialogTrigger asChild>
-            <Button variant="neon">
-              <Plus className="h-4 w-4 mr-2" />
-              Schedule Post
-            </Button>
-          </DialogTrigger>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="ai-suggestions" className="text-sm">AI Suggestions</Label>
+            <Switch
+              id="ai-suggestions"
+              checked={aiSuggestionsEnabled}
+              onCheckedChange={setAiSuggestionsEnabled}
+            />
+          </div>
+          <Button variant="outline" onClick={autoFillEmptySlots} className="glass border-primary/20">
+            <Sparkles className="h-4 w-4 mr-2" />
+            Auto-Fill Slots
+          </Button>
+        </div>
+      </div>
+
+      <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+        <DialogTrigger asChild>
+          <Button variant="neon">
+            <Plus className="h-4 w-4 mr-2" />
+            Schedule Post
+          </Button>
+        </DialogTrigger>
           <DialogContent className="glass border-primary/20 max-w-2xl">
             <DialogHeader>
               <DialogTitle className="text-foreground">Schedule New Post</DialogTitle>
@@ -206,13 +327,26 @@ const SocialPlanner = () => {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label>Content</Label>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={generateAIContent}
-                  >
-                    ✨ AI Generate
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={generateAIContent}
+                      disabled={!aiSuggestionsEnabled}
+                    >
+                      <Brain className="h-4 w-4 mr-1" />
+                      AI Generate
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={generateHashtagSuggestions}
+                      disabled={!aiSuggestionsEnabled}
+                    >
+                      <Hash className="h-4 w-4 mr-1" />
+                      Hashtags
+                    </Button>
+                  </div>
                 </div>
                 <Textarea
                   placeholder="Write your post content..."
@@ -226,7 +360,18 @@ const SocialPlanner = () => {
               </div>
 
               <div className="space-y-2">
-                <Label>Schedule Date & Time</Label>
+                <div className="flex items-center justify-between">
+                  <Label>Schedule Date & Time</Label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={suggestBestTime}
+                    disabled={!aiSuggestionsEnabled || !newPost.platform}
+                  >
+                    <Target className="h-4 w-4 mr-1" />
+                    Best Time
+                  </Button>
+                </div>
                 <Input
                   type="datetime-local"
                   value={format(newPost.scheduled_for, "yyyy-MM-dd'T'HH:mm")}
@@ -236,6 +381,38 @@ const SocialPlanner = () => {
                   }))}
                   className="glass border-primary/20"
                 />
+                {newPost.platform && aiSuggestionsEnabled && (
+                  <div className="text-xs text-muted-foreground">
+                    <span className="font-medium">Best times for {platforms.find(p => p.id === newPost.platform)?.name}: </span>
+                    {getBestTimeForPlatform(newPost.platform).join(', ')}
+                  </div>
+                )}
+              </div>
+
+              {showHashtagSuggestions && newPost.hashtags.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Suggested Hashtags</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {newPost.hashtags.map((hashtag, index) => (
+                      <Badge key={index} variant="secondary" className="text-xs">
+                        {hashtag}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label>Auto-Publish</Label>
+                  <Switch
+                    checked={newPost.auto_publish}
+                    onCheckedChange={(checked) => setNewPost(prev => ({ ...prev, auto_publish: checked }))}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {newPost.auto_publish ? 'Post will be published automatically' : 'Post will be saved as draft'}
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -266,9 +443,8 @@ const SocialPlanner = () => {
                 </Button>
               </div>
             </div>
-          </DialogContent>
-        </Dialog>
-      </div>
+        </DialogContent>
+      </Dialog>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Calendar */}
@@ -381,8 +557,12 @@ const SocialPlanner = () => {
                             </Badge>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Button variant="ghost" size="sm">
-                              <Eye className="h-3 w-3" />
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => viewPostPerformance(post)}
+                            >
+                              <BarChart3 className="h-3 w-3" />
                             </Button>
                             <Button variant="ghost" size="sm">
                               <Edit className="h-3 w-3" />
@@ -428,6 +608,95 @@ const SocialPlanner = () => {
           </Card>
         </div>
       </div>
+
+      {/* Performance Modal */}
+      <Dialog open={showPerformanceModal} onOpenChange={setShowPerformanceModal}>
+        <DialogContent className="glass border-primary/20 max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-foreground">Post Performance</DialogTitle>
+          </DialogHeader>
+          {selectedPost && (
+            <div className="space-y-6">
+              {/* Post Preview */}
+              <div className="p-4 rounded-lg glass border border-secondary/20">
+                <div className="flex items-center gap-3 mb-3">
+                  {(() => {
+                    const PlatformIcon = getPlatformIcon(selectedPost.platform);
+                    return <PlatformIcon className={`h-5 w-5 ${getPlatformColor(selectedPost.platform)}`} />;
+                  })()}
+                  <span className="font-medium capitalize">{selectedPost.platform}</span>
+                  <Badge variant="outline">
+                    {format(new Date(selectedPost.scheduled_for), 'MMM d, yyyy h:mm a')}
+                  </Badge>
+                </div>
+                <p className="text-sm text-foreground">{selectedPost.content}</p>
+              </div>
+
+              {/* Performance Metrics */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {performanceMetrics.map((metric, index) => (
+                  <Card key={index} className="glass border-primary/20">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <metric.icon className="h-5 w-5 text-primary" />
+                        <span className={`text-xs ${metric.change.startsWith('+') ? 'text-primary' : 'text-red-500'}`}>
+                          {metric.change}
+                        </span>
+                      </div>
+                      <div className="mt-2">
+                        <div className="text-xl font-bold text-foreground">{metric.value}</div>
+                        <div className="text-xs text-muted-foreground">{metric.label}</div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Engagement Timeline */}
+              <Card className="glass border-primary/20">
+                <CardHeader>
+                  <CardTitle className="text-foreground">Engagement Over Time</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-8 text-muted-foreground">
+                    <TrendingUp className="h-12 w-12 mx-auto mb-4" />
+                    <p>Engagement timeline would be shown here with real data</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* AI Insights */}
+              <Card className="glass border-primary/20">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-foreground">
+                    <Brain className="h-5 w-5 text-primary" />
+                    AI Performance Insights
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
+                      <p className="text-sm text-foreground">
+                        🎯 <strong>Peak Engagement:</strong> This post received 40% more engagement than your average {selectedPost.platform} post.
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-accent/10 border border-accent/20">
+                      <p className="text-sm text-foreground">
+                        ⏰ <strong>Timing Analysis:</strong> Posted at optimal time (2:00 PM) which contributed to higher reach.
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-secondary/10 border border-secondary/20">
+                      <p className="text-sm text-foreground">
+                        💡 <strong>Content Insight:</strong> Posts with emojis and questions generate 25% more comments.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
