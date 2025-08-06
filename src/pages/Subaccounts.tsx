@@ -102,11 +102,24 @@ const Subaccounts = () => {
         });
       } else {
         // Create new subaccount
-        const { error } = await supabase
+        const { data: newSubaccount, error } = await supabase
           .from('subaccounts')
-          .insert([payload]);
+          .insert([payload])
+          .select()
+          .single();
 
         if (error) throw error;
+
+        // Create user_subaccount relationship
+        const { error: relationError } = await supabase
+          .from('user_subaccounts')
+          .insert([{
+            user_id: user.id,
+            subaccount_id: newSubaccount.id,
+            role: 'admin'
+          }]);
+
+        if (relationError) throw relationError;
         toast({
           title: "Success", 
           description: "Subaccount created successfully"

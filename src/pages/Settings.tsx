@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,57 @@ import { toast } from "sonner";
 const Settings = () => {
   const { user } = useAuth();
   const [planType] = useState("agency"); // This would come from user profile
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+
+  const handlePasswordUpdate = async () => {
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      toast.error("Please fill in all password fields");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error("New passwords don't match");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+
+    setIsUpdatingPassword(true);
+    try {
+      // First verify the old password by attempting to sign in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user?.email || '',
+        password: oldPassword
+      });
+
+      if (signInError) {
+        toast.error("Current password is incorrect");
+        return;
+      }
+
+      // Update password
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) throw error;
+
+      toast.success("Password updated successfully");
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      toast.error("Failed to update password");
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -57,14 +109,42 @@ const Settings = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
+                <Label>Current Password</Label>
+                <Input 
+                  type="password" 
+                  placeholder="Enter current password" 
+                  className="glass border-primary/20"
+                  value={oldPassword}
+                  onChange={(e) => setOldPassword(e.target.value)}
+                />
+              </div>
+              <div>
                 <Label>New Password</Label>
-                <Input type="password" placeholder="Enter new password" className="glass border-primary/20" />
+                <Input 
+                  type="password" 
+                  placeholder="Enter new password" 
+                  className="glass border-primary/20"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
               </div>
               <div>
                 <Label>Confirm Password</Label>
-                <Input type="password" placeholder="Confirm new password" className="glass border-primary/20" />
+                <Input 
+                  type="password" 
+                  placeholder="Confirm new password" 
+                  className="glass border-primary/20"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
               </div>
-              <Button variant="outline">Update Password</Button>
+              <Button 
+                variant="outline" 
+                onClick={handlePasswordUpdate}
+                disabled={isUpdatingPassword}
+              >
+                {isUpdatingPassword ? "Updating..." : "Update Password"}
+              </Button>
             </CardContent>
           </Card>
 
@@ -121,16 +201,6 @@ const Settings = () => {
             </CardContent>
           </Card>
 
-          <Card className="glass border-primary/20">
-            <CardHeader>
-              <CardTitle>Account Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button variant="outline" className="w-full">Export Data</Button>
-              <Button variant="outline" className="w-full">Download Reports</Button>
-              <Button variant="destructive" className="w-full">Delete Account</Button>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </div>

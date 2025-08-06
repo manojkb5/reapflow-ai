@@ -42,7 +42,6 @@ const navigation = [
   { title: "Social Planner", url: "/social-planner", icon: Calendar },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Integrations", url: "/integrations", icon: Plug },
-  { title: "Client Portal", url: "/client-portal", icon: User },
 ];
 
 const settingsNav = [

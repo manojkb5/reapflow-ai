@@ -17,7 +17,7 @@ import SocialPlanner from "./pages/SocialPlanner";
 import Analytics from "./pages/Analytics";
 import Integrations from "./pages/Integrations";
 import Settings from "./pages/Settings";
-import ClientPortal from "./pages/ClientPortal";
+
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,7 +43,7 @@ const App = () => (
             <Route path="/social-planner" element={<AppLayout><SocialPlanner /></AppLayout>} />
             <Route path="/analytics" element={<AppLayout><Analytics /></AppLayout>} />
             <Route path="/integrations" element={<AppLayout><Integrations /></AppLayout>} />
-            <Route path="/client-portal" element={<AppLayout><div className="p-6"><h1 className="text-2xl font-bold">Client Portal</h1><p className="text-muted-foreground">Coming soon...</p></div></AppLayout>} />
+            
             <Route path="/settings" element={<AppLayout><Settings /></AppLayout>} />
             
             {/* Catch-all route */}

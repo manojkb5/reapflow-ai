@@ -175,7 +175,7 @@ const Workflows = () => {
             description: '',
             is_active: false,
             created_by: user.id,
-            subaccount_id: '', // Will implement subaccount selection later
+            subaccount_id: '00000000-0000-0000-0000-000000000000' // Default subaccount
           }
         ])
         .select()
