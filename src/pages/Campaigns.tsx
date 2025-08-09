@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
+import { useActivityTracker } from "@/hooks/useActivityTracker";
 import { 
   Plus, 
   Megaphone, 
@@ -89,6 +90,7 @@ const Campaigns = () => {
 
   const { user } = useAuth();
   const { toast } = useToast();
+  const { trackActivity } = useActivityTracker();
 
   useEffect(() => {
     if (user) {
@@ -244,16 +246,36 @@ Limited time offer - Act now and get 30% off your first month!
           .eq('id', selectedCampaign.id);
 
         if (error) throw error;
+        
+        // Track activity
+        await trackActivity(
+          'campaign_updated',
+          `Campaign "${formData.name}" was updated`,
+          formData.subaccount_id,
+          { campaign_id: selectedCampaign.id, platform: formData.platform }
+        );
+        
         toast({
           title: "Success",
           description: "Campaign updated successfully"
         });
       } else {
-        const { error } = await supabase
+        const { data: newCampaign, error } = await supabase
           .from('campaigns')
-          .insert([payload]);
+          .insert([payload])
+          .select()
+          .single();
 
         if (error) throw error;
+        
+        // Track activity
+        await trackActivity(
+          'campaign_created',
+          `New campaign "${formData.name}" was created`,
+          formData.subaccount_id,
+          { campaign_id: newCampaign.id, platform: formData.platform }
+        );
+        
         toast({
           title: "Success", 
           description: "Campaign created successfully"
@@ -317,6 +339,17 @@ Limited time offer - Act now and get 30% off your first month!
         .eq('id', campaignId);
 
       if (error) throw error;
+
+      // Find the campaign to get its details for activity tracking
+      const campaign = campaigns.find(c => c.id === campaignId);
+      if (campaign) {
+        await trackActivity(
+          'campaign_status_changed',
+          `Campaign "${campaign.name}" status changed to ${newStatus}`,
+          campaign.subaccount_id,
+          { campaign_id: campaignId, old_status: campaign.status, new_status: newStatus }
+        );
+      }
       
       toast({
         title: "Success",

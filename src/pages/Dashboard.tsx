@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,10 +13,13 @@ import {
   Zap,
   Target
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/AuthProvider";
+import { toast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
-  // Mock data for demonstration
-  const stats = [
+  const { user } = useAuth();
+  const [stats, setStats] = useState([
     {
       title: "Total Leads",
       value: "0",
@@ -48,34 +52,152 @@ const Dashboard = () => {
       icon: TrendingUp,
       color: "text-accent"
     }
-  ];
+  ]);
+  
+  const [recentActivities, setRecentActivities] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const recentActivities = [
-    {
-      action: "New lead created",
-      details: "John Smith from Facebook Ad Campaign",
-      time: "2 minutes ago",
-      type: "lead"
-    },
-    {
-      action: "Campaign launched",
-      details: "Instagram Ad - Real Estate Listings",
-      time: "1 hour ago",
-      type: "campaign"
-    },
-    {
-      action: "AI generated content",
-      details: "5 new ad variations created",
-      time: "3 hours ago",
-      type: "ai"
-    },
-    {
-      action: "Workflow triggered",
-      details: "Welcome email sent to 12 new leads",
-      time: "5 hours ago",
-      type: "workflow"
+  // Function to create a recent activity
+  const createActivity = async (activityType: string, description: string, subaccountId: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('recent_activities')
+        .insert({
+          subaccount_id: subaccountId,
+          activity_type: activityType,
+          description: description,
+          created_by: user.id
+        });
+
+      if (error) {
+        console.error('Error creating activity:', error);
+        return;
+      }
+
+      // Refresh activities
+      fetchRecentActivities();
+    } catch (error) {
+      console.error('Error creating activity:', error);
     }
-  ];
+  };
+
+  // Fetch dashboard data
+  const fetchDashboardData = async () => {
+    if (!user) return;
+
+    try {
+      setLoading(true);
+
+      // Get user's subaccounts
+      const { data: userSubaccounts } = await supabase
+        .from('user_subaccounts')
+        .select('subaccount_id')
+        .eq('user_id', user.id);
+
+      if (!userSubaccounts || userSubaccounts.length === 0) {
+        setLoading(false);
+        return;
+      }
+
+      const subaccountIds = userSubaccounts.map(us => us.subaccount_id);
+
+      // Fetch contacts count
+      const { count: contactsCount } = await supabase
+        .from('contacts')
+        .select('*', { count: 'exact', head: true })
+        .in('subaccount_id', subaccountIds);
+
+      // Fetch active campaigns count
+      const { count: campaignsCount } = await supabase
+        .from('campaigns')
+        .select('*', { count: 'exact', head: true })
+        .in('subaccount_id', subaccountIds)
+        .eq('status', 'active');
+
+      // Update stats with real data
+      setStats(prevStats => [
+        { ...prevStats[0], value: contactsCount?.toString() || "0" },
+        { ...prevStats[1], value: campaignsCount?.toString() || "0" },
+        { ...prevStats[2], value: "$0" }, // Revenue will be calculated from campaigns
+        { ...prevStats[3], value: "0%" } // Conversion rate calculation
+      ]);
+
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load dashboard data",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch recent activities
+  const fetchRecentActivities = async () => {
+    if (!user) return;
+
+    try {
+      // Get user's subaccounts
+      const { data: userSubaccounts } = await supabase
+        .from('user_subaccounts')
+        .select('subaccount_id')
+        .eq('user_id', user.id);
+
+      if (!userSubaccounts || userSubaccounts.length === 0) {
+        return;
+      }
+
+      const subaccountIds = userSubaccounts.map(us => us.subaccount_id);
+
+      // Fetch recent activities
+      const { data: activities, error } = await supabase
+        .from('recent_activities')
+        .select('*')
+        .in('subaccount_id', subaccountIds)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (error) {
+        console.error('Error fetching activities:', error);
+        return;
+      }
+
+      // Get creator profiles separately
+      const creatorIds = activities?.map(a => a.created_by) || [];
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, first_name, last_name')
+        .in('user_id', creatorIds);
+
+      // Format activities for display
+      const formattedActivities = activities?.map(activity => {
+        const creator = profiles?.find(p => p.user_id === activity.created_by);
+        return {
+          action: activity.description,
+          details: `By ${creator?.first_name || 'Unknown'} ${creator?.last_name || 'User'}`,
+          time: new Date(activity.created_at).toLocaleString(),
+          type: activity.activity_type
+        };
+      }) || [];
+
+      setRecentActivities(formattedActivities);
+
+    } catch (error) {
+      console.error('Error fetching recent activities:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchDashboardData();
+      fetchRecentActivities();
+    }
+  }, [user]);
+
 
   const quickActions = [
     {
@@ -152,22 +274,35 @@ const Dashboard = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {recentActivities.map((activity, index) => (
-              <div key={index} className="flex items-start gap-3 p-3 rounded-lg hover:bg-secondary/20 transition-colors">
-                <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0"></div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground">
-                    {activity.action}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {activity.details}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {activity.time}
-                  </p>
-                </div>
+            {loading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                <p className="text-muted-foreground mt-2">Loading activities...</p>
               </div>
-            ))}
+            ) : recentActivities.length > 0 ? (
+              recentActivities.map((activity, index) => (
+                <div key={index} className="flex items-start gap-3 p-3 rounded-lg hover:bg-secondary/20 transition-colors">
+                  <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0"></div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground">
+                      {activity.action}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {activity.details}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {activity.time}
+                    </p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <Activity className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">No recent activities</p>
+                <p className="text-xs text-muted-foreground">Activities will appear here when you start using the CRM</p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

@@ -25,25 +25,20 @@ const Analytics = () => {
   const [showFilters, setShowFilters] = useState(false);
 
   const platformData = [
-    { name: 'Facebook', value: 45, color: 'hsl(var(--primary))', spend: 12600 },
-    { name: 'Instagram', value: 30, color: 'hsl(var(--accent))', spend: 8400 },
-    { name: 'Google', value: 20, color: 'hsl(var(--secondary))', spend: 5600 },
-    { name: 'YouTube', value: 5, color: 'hsl(var(--muted))', spend: 1400 },
+    { name: 'Facebook', value: 0, color: 'hsl(var(--primary))', spend: 0 },
+    { name: 'Instagram', value: 0, color: 'hsl(var(--accent))', spend: 0 },
+    { name: 'Google', value: 0, color: 'hsl(var(--secondary))', spend: 0 },
+    { name: 'YouTube', value: 0, color: 'hsl(var(--muted))', spend: 0 },
   ];
 
   const metrics = [
-    { title: "Total Spend", value: "$28,000", change: "+12%", icon: DollarSign, color: "text-red-500" },
-    { title: "Total Revenue", value: "$84,000", change: "+18%", icon: TrendingUp, color: "text-primary" },
-    { title: "Impressions", value: "2.4M", change: "+25%", icon: Eye, color: "text-accent" },
-    { title: "CTR", value: "3.2%", change: "+0.5%", icon: MousePointer, color: "text-orange-500" },
+    { title: "Total Spend", value: "$0", change: "+0%", icon: DollarSign, color: "text-red-500" },
+    { title: "Total Revenue", value: "$0", change: "+0%", icon: TrendingUp, color: "text-primary" },
+    { title: "Impressions", value: "0", change: "+0%", icon: Eye, color: "text-accent" },
+    { title: "CTR", value: "0%", change: "+0%", icon: MousePointer, color: "text-orange-500" },
   ];
 
-  const campaignPerformanceData = [
-    { campaign: "Black Friday Sale", platform: "Facebook", spend: 5000, revenue: 15000, roi: 300, ctr: 3.2, conversions: 150 },
-    { campaign: "Holiday Campaign", platform: "Instagram", spend: 3500, revenue: 10500, roi: 300, ctr: 2.8, conversions: 105 },
-    { campaign: "New Year Promo", platform: "Google", spend: 4200, revenue: 12600, roi: 300, ctr: 4.1, conversions: 126 },
-    { campaign: "Spring Collection", platform: "YouTube", spend: 2800, revenue: 8400, roi: 300, ctr: 2.1, conversions: 84 },
-  ];
+  const campaignPerformanceData: any[] = [];
 
   useEffect(() => {
     fetchAnalyticsData();

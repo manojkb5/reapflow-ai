@@ -508,6 +508,36 @@ export type Database = {
         }
         Relationships: []
       }
+      recent_activities: {
+        Row: {
+          activity_type: string
+          created_at: string
+          created_by: string
+          description: string
+          id: string
+          metadata: Json | null
+          subaccount_id: string
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string
+          created_by: string
+          description: string
+          id?: string
+          metadata?: Json | null
+          subaccount_id: string
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string
+          created_by?: string
+          description?: string
+          id?: string
+          metadata?: Json | null
+          subaccount_id?: string
+        }
+        Relationships: []
+      }
       scheduled_posts: {
         Row: {
           content: string
