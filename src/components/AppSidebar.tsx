@@ -68,20 +68,12 @@ export function AppSidebar() {
       collapsible="icon"
     >
       <SidebarHeader className="border-b border-border/50 p-4">
-        <div className="flex items-center gap-3">
-          <img 
-            src={logo} 
-            alt="ReapFlow" 
-            className="w-8 h-8 animate-pulse-glow" 
-          />
-          {!isCollapsed && (
-            <div>
-              <h1 className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                ReapFlow
-              </h1>
-              <p className="text-xs text-muted-foreground">AI-Powered CRM</p>
-            </div>
-          )}
+        <div className="flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-lg font-bold bg-gradient-primary bg-clip-text text-transparent">
+              {!isCollapsed ? "Navigation" : "Nav"}
+            </h2>
+          </div>
         </div>
       </SidebarHeader>
 
