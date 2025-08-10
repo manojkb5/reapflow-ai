@@ -42,25 +42,9 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
         <div className="flex-1 flex flex-col">
           {/* Top Navigation Bar */}
           <header className="h-14 flex items-center justify-between border-b border-border/50 glass px-4">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-3 bg-black rounded-lg p-3">
-                <img 
-                  src="/lovable-uploads/042f2286-5c5c-466c-b3cc-92fd2a278d80.png" 
-                  alt="ReapFlow" 
-                  className="w-12 h-12" 
-                />
-                <div>
-                  <h1 className="text-lg font-bold bg-gradient-primary bg-clip-text text-transparent">
-                    ReapFlow
-                  </h1>
-                  <p className="text-xs text-muted-foreground">AI-Powered CRM</p>
-                </div>
-              </div>
-              
-              <SidebarTrigger className="text-primary hover:bg-primary/10 transition-colors">
-                <Menu className="h-5 w-5" />
-              </SidebarTrigger>
-            </div>
+            <SidebarTrigger className="text-primary hover:bg-primary/10 transition-colors">
+              <Menu className="h-5 w-5" />
+            </SidebarTrigger>
             
             <div className="flex items-center gap-2">
               <div className="h-2 w-2 bg-accent rounded-full animate-pulse"></div>
