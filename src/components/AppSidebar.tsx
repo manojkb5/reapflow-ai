@@ -72,7 +72,7 @@ export function AppSidebar() {
           <img 
             src="/lovable-uploads/042f2286-5c5c-466c-b3cc-92fd2a278d80.png" 
             alt="ReapFlow" 
-            className="w-12 h-12" 
+            className="w-16 h-16" 
           />
           {!isCollapsed && (
             <div>
